@@ -1,6 +1,6 @@
 
 #include <windows.h>
-#include <commctrl.h
+#include <commctrl.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
@@ -15,7 +15,7 @@ int convertDec2Bin(char * input, char ** output) {
     *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
 
     for(; i < len; i++)
-        if(input[i] < '0' || input[i] > '9') /* TODO: isdigit()? */
+        if(!isdigit(input[i])) /* TODO: isdigit()? */
             return 1;
 
     itoa(atoi(input), *output, 2); /* TODO: itoa() is not included in C89 standard, it's extension to it. */
@@ -29,8 +29,9 @@ int convertBin2Dec(char * input, char ** output) {
     *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
 
     for(; i < len; i++)
-        if(input[i] < '0' || input[i] > '1')
+        if(input[i] != '0' && input[i] != '1')
             return 1;
+            
 
     for(i = 0; i < len; i++, power--)
         if(input[i] == '1')
@@ -116,16 +117,15 @@ void createUI(HWND hwnd) {
 
 void butConvertClick(HWND hwnd) {
     char input[VAR_LENGTH], * output;
-    int result;
-                
+
     GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), input, VAR_LENGTH);
-	
+
     SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT),
 		  (SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0) ?
 		     convertBin2Dec(input, &output) :
 		     convertDec2Bin(input, &output))
-		  ? output : "Internal Error.");
-                
+		  ? "Internal Error." : output);
+
     free(output);
 }
 
