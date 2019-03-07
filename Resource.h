@@ -6,4 +6,4 @@
 #define ID_TEX_OUTPUT (140)
 
 //Input and output string lenght
-#define VAR_LENGHT 64
+#define VAR_LENGTH 64
