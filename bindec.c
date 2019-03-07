@@ -1,73 +1,65 @@
-//Windows headers
-#include <windows.h>
-#include <commctrl.h>
 
-//Standard C headers
+#include <windows.h>
+#include <commctrl.h
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
 
 #include "Resource.h"
 
-const char winClassName[] = "BINDECWinClass";
+#define winClassName "BINDECWinClass"
 
-bool convertDec2Bin(char input[], char **output) //Convert DEC to BIN, save value in output and return result
-{
-    *output = malloc(VAR_LENGHT);
+/* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
+int convertDec2Bin(char * input, char ** output) {
+    int i = 0, len = strlen(input);
+    *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
 
-    for(int i = 0; i < strlen(input); i++)
-        if(input[i] < '0' || input[i] > '9')
-            return false;
+    for(; i < len; i++)
+        if(input[i] < '0' || input[i] > '9') /* TODO: isdigit()? */
+            return 1;
 
-    int value = atoi(input);
-    itoa(value, *output, 2);
+    itoa(atoi(input), *output, 2); /* TODO: itoa() is not included in C89 standard, it's extension to it. */
     
-    return true;
+    return 0;
 }
 
-bool convertBin2Dec(char input[], char **output) ////Convert BIN to DEC, save value in output and return result
-{
-    *output = malloc(VAR_LENGHT);
-    int value = 0;
+/* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
+int convertBin2Dec(char * input, char ** output) {
+    int value = 0, power = strlen(input) - 1, i = 0, len = strlen(input);
+    *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
 
-    for(int i = 0; i < strlen(input); i++)
+    for(; i < len; i++)
         if(input[i] < '0' || input[i] > '1')
-            return false;
+            return 1;
 
-    int power = strlen(input) - 1;
-
-    for(int i = 0; i < strlen(input); i++)
-    {
+    for(i = 0; i < len; i++, power--)
         if(input[i] == '1')
             value += pow(2, power);
 
-        power--;
-    }
-
     itoa(value, *output, 10);
 
-    return true;
+    return 0;
 }
 
-void createUI(HWND hwnd) //Create controls like buttons and text boxes
-{
+void createUI(HWND hwnd) {
     HINSTANCE hInstance = (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
+    HWND hConvertButton, hBIN2DECRadio, hDEC2BINRadio, hInputText, hOutputText;
 
-    HWND hConvertButton = CreateWindowEx(
+    hConvertButton = CreateWindowEx(
         0,
-        "BUTTON", //Class name
-        "Convert", //Label
-        WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, //Properties
-        10, //X
-        100, //Y
-        270, //Width
-        40, //Height
-        hwnd, (HMENU)ID_BUT_CONVERT, hInstance, NULL); //Parent window, ID, parent instance
+        "BUTTON", /* Class name */
+        "Convert", /* Label */
+        WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, /* Properties */
+        10, /* X */
+        100, /* Y */
+        270, /* Width */
+        40, /* Height */
+        hwnd, (HMENU)ID_BUT_CONVERT, hInstance, NULL); /* Parent window, ID, parent instance */
 
-    //Set font to default system font
+    /* Set font to default system font */
     SendMessage(hConvertButton, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 
-    HWND hBIN2DECRadio = CreateWindowEx(
+    hBIN2DECRadio = CreateWindowEx(
         0,
         "BUTTON",
         "BIN2DEC",
@@ -81,7 +73,7 @@ void createUI(HWND hwnd) //Create controls like buttons and text boxes
     SendMessage(hBIN2DECRadio, BM_SETCHECK, BST_CHECKED,1); //Set radio button state to checked
     SendMessage(hBIN2DECRadio, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 
-    HWND hDEC2BINRadio = CreateWindowEx(
+    hDEC2BINRadio = CreateWindowEx(
         0,
         "BUTTON",
         "DEC2BIN",
@@ -94,7 +86,7 @@ void createUI(HWND hwnd) //Create controls like buttons and text boxes
 
     SendMessage(hDEC2BINRadio, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 
-    HWND hInputText = CreateWindowEx(
+    hInputText = CreateWindowEx(
         0,
         "EDIT",
         NULL,
@@ -107,7 +99,7 @@ void createUI(HWND hwnd) //Create controls like buttons and text boxes
 
     SendMessage(hInputText, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 
-    HWND hOutputText = CreateWindowEx(
+    hOutputText = CreateWindowEx(
         0,
         "EDIT",
         NULL,
@@ -118,36 +110,27 @@ void createUI(HWND hwnd) //Create controls like buttons and text boxes
         25,
         hwnd, (HMENU)ID_TEX_OUTPUT, hInstance, NULL);
 
-    SetWindowText(hOutputText, "0"); //Write 0 in text box for better appearance
+    SetWindowText(hOutputText, "0"); /* Write 0 in text box for better appearance */
     SendMessage(hOutputText, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 }
 
-void butConvertClick(HWND hwnd)
-{
-    char input[VAR_LENGHT];
-    char *output;
-    bool result;
+void butConvertClick(HWND hwnd) {
+    char input[VAR_LENGTH], * output;
+    int result;
                 
-    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), input, VAR_LENGHT);
-
-    //Check which radio button is checked
-    if(SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0))
-        result = convertBin2Dec(input, &output);
-    else
-        result = convertDec2Bin(input, &output);
-
-    if(result)
-        SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT), output);
-    else
-        SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT), "Input error");
+    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), input, VAR_LENGTH);
+	
+    SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT),
+		  (SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0) ?
+		     convertBin2Dec(input, &output) :
+		     convertDec2Bin(input, &output))
+		  ? output : "Internal Error.");
                 
-    free(output); //Free array allocated by function        
+    free(output);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch(msg)
-    {
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch(msg) {
         case WM_CREATE:
             createUI(hwnd);
             break;
@@ -166,7 +149,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             break;
 
-        case WM_CTLCOLORSTATIC: //Without it radio button has gray background
+        case WM_CTLCOLORSTATIC:
             break;
 
         default:
@@ -177,8 +160,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     WNDCLASSEX wc;
     HWND hwnd;
     MSG msg;
@@ -201,8 +183,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.lpszClassName = winClassName;
     wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-    if(!RegisterClassEx(&wc))
-    {
+    if(!RegisterClassEx(&wc)) {
         MessageBox(NULL, "Can't register window class!", "Error", MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
@@ -214,12 +195,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        300,
+        300, /* TODO: Make it a #define */
         180,
         NULL, NULL, hInstance, NULL);
 
-    if(hwnd == NULL)
-    {
+    if(!hwnd) {
         MessageBox(NULL, "Can't create window!", "Error", MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
@@ -227,8 +207,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 
-    while(GetMessage(&msg, NULL, 0, 0) > 0)
-    {
+    while(GetMessage(&msg, NULL, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
