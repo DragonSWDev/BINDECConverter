@@ -11,14 +11,12 @@ I was using MinGW-w64 to build it so instructions are for MinGW but Visual Studi
 Instructions on project page:
 https://mingw-w64.org/doku.php
 
-### Compile resource file
-```sh
-windres resources.rc -o resources.o
-```
+### Compile application
 
-### Compile source code
-```sh
-gcc -o bindec.exe bindec.c resources.o -mwindows -lcomctl32 -s -O2 -Wall -pedantic
+Use `gmake`/`make`/`mingw32-make`.
+
+```
+gmake [all/clean]
 ```
 
 ## License
