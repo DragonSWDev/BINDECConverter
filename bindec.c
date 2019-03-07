@@ -15,7 +15,7 @@ int convertDec2Bin(char * input, char ** output) {
     *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
 
     for(; i < len; i++)
-        if(!isdigit(input[i])) /* TODO: isdigit()? */
+        if(!isdigit(input[i]))
             return 1;
 
     itoa(atoi(input), *output, 2); /* TODO: itoa() is not included in C89 standard, it's extension to it. */
