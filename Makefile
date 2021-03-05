@@ -1,6 +1,6 @@
 
 C=gcc
-CFLAGS=-O2 -Wall -pedantic
+CFLAGS=-O2 -Wall -pedantic -DUNICODE -D_UNICODE
 LDFLAGS=-mwindows -lcomctl32 -s
 
 .PHONY: clean all

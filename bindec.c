@@ -7,7 +7,7 @@
 
 #include "Resource.h"
 
-#define winClassName "BINDECWinClass"
+#define winClassName L"BINDECWinClass"
 
 /* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
 int convertDec2Bin(char * input, char ** output) {
@@ -48,8 +48,8 @@ void createUI(HWND hwnd) {
 
     hConvertButton = CreateWindowEx(
         0,
-        "BUTTON", /* Class name */
-        "Convert", /* Label */
+        L"BUTTON", /* Class name */
+        L"Convert", /* Label */
         WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, /* Properties */
         10, /* X */
         100, /* Y */
@@ -62,8 +62,8 @@ void createUI(HWND hwnd) {
 
     hBIN2DECRadio = CreateWindowEx(
         0,
-        "BUTTON",
-        "BIN2DEC",
+        L"BUTTON",
+        L"BIN2DEC",
         WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
         13,
         10,
@@ -76,8 +76,8 @@ void createUI(HWND hwnd) {
 
     hDEC2BINRadio = CreateWindowEx(
         0,
-        "BUTTON",
-        "DEC2BIN",
+        L"BUTTON",
+        L"DEC2BIN",
         WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
         215,
         10,
@@ -89,7 +89,7 @@ void createUI(HWND hwnd) {
 
     hInputText = CreateWindowEx(
         0,
-        "EDIT",
+        L"EDIT",
         NULL,
         WS_VISIBLE | WS_CHILD | WS_BORDER,
         10,
@@ -102,7 +102,7 @@ void createUI(HWND hwnd) {
 
     hOutputText = CreateWindowEx(
         0,
-        "EDIT",
+        L"EDIT",
         NULL,
         WS_VISIBLE | WS_CHILD | WS_BORDER | ES_READONLY,
         10,
@@ -111,20 +111,32 @@ void createUI(HWND hwnd) {
         25,
         hwnd, (HMENU)ID_TEX_OUTPUT, hInstance, NULL);
 
-    SetWindowText(hOutputText, "0"); /* Write 0 in text box for better appearance */
+    SetWindowText(hOutputText, L"0"); /* Write 0 in text box for better appearance */
     SendMessage(hOutputText, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 }
 
 void butConvertClick(HWND hwnd) {
     char input[VAR_LENGTH], * output;
+    LPWSTR wideInput = (LPWSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPWSTR));
+    LPWSTR wideOutput = (LPWSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPWSTR));
 
-    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), input, VAR_LENGTH);
+    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), wideInput, VAR_LENGTH);
+    wcstombs(input, wideInput, VAR_LENGTH); /* Convert wide string to char array */
 
-    SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT),
-		  (SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0) ?
-		     convertBin2Dec(input, &output) :
-		     convertDec2Bin(input, &output))
-		  ? "Internal Error." : output);
+    int status = 0;
+
+    if (SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0)) { /* Make conversion and get status */
+        status = convertBin2Dec(input, &output);
+    }
+    else {
+        status = convertDec2Bin(input, &output);
+    }
+
+    if (status == 0) { /* Conversion succeeded */
+        mbstowcs(wideOutput, output, VAR_LENGTH); /* Convert char array to wide string */
+    }
+
+    SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT), status ? L"Internal Error." : wideOutput);
 
     free(output);
 }
@@ -184,14 +196,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
     if(!RegisterClassEx(&wc)) {
-        MessageBox(NULL, "Can't register window class!", "Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, L"Can't register window class!", L"Error", MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         winClassName,
-        "BIN&DEC Converter",
+        L"BIN&DEC Converter",
         WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -200,7 +212,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         NULL, NULL, hInstance, NULL);
 
     if(!hwnd) {
-        MessageBox(NULL, "Can't create window!", "Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, L"Can't create window!", L"Error", MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
