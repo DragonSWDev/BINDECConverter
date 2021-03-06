@@ -7,7 +7,7 @@
 
 #include "Resource.h"
 
-#define winClassName L"BINDECWinClass"
+#define winClassName TEXT("BINDECWinClass")
 
 /* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
 int convertDec2Bin(char * input, char ** output) {
@@ -81,8 +81,8 @@ void createUI(HWND hwnd) {
 
     hConvertButton = CreateWindowEx(
         0,
-        L"BUTTON", /* Class name */
-        L"Convert", /* Label */
+        TEXT("BUTTON"), /* Class name */
+        TEXT("Convert"), /* Label */
         WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, /* Properties */
         10, /* X */
         100, /* Y */
@@ -95,8 +95,8 @@ void createUI(HWND hwnd) {
 
     hBIN2DECRadio = CreateWindowEx(
         0,
-        L"BUTTON",
-        L"BIN2DEC",
+        TEXT("BUTTON"),
+        TEXT("BIN2DEC"),
         WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
         13,
         10,
@@ -109,8 +109,8 @@ void createUI(HWND hwnd) {
 
     hDEC2BINRadio = CreateWindowEx(
         0,
-        L"BUTTON",
-        L"DEC2BIN",
+        TEXT("BUTTON"),
+        TEXT("DEC2BIN"),
         WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
         215,
         10,
@@ -122,7 +122,7 @@ void createUI(HWND hwnd) {
 
     hInputText = CreateWindowEx(
         0,
-        L"EDIT",
+        TEXT("EDIT"),
         NULL,
         WS_VISIBLE | WS_CHILD | WS_BORDER,
         10,
@@ -135,7 +135,7 @@ void createUI(HWND hwnd) {
 
     hOutputText = CreateWindowEx(
         0,
-        L"EDIT",
+        TEXT("EDIT"),
         NULL,
         WS_VISIBLE | WS_CHILD | WS_BORDER | ES_READONLY,
         10,
@@ -144,17 +144,23 @@ void createUI(HWND hwnd) {
         25,
         hwnd, (HMENU)ID_TEX_OUTPUT, hInstance, NULL);
 
-    SetWindowText(hOutputText, L"0"); /* Write 0 in text box for better appearance */
+    SetWindowText(hOutputText, TEXT("0")); /* Write 0 in text box for better appearance */
     SendMessage(hOutputText, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 }
 
 void butConvertClick(HWND hwnd) {
     char input[VAR_LENGTH], * output;
-    LPWSTR wideInput = (LPWSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPWSTR));
-    LPWSTR wideOutput = (LPWSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPWSTR));
 
-    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), wideInput, VAR_LENGTH);
-    wcstombs(input, wideInput, VAR_LENGTH); /* Convert wide string to char array */
+    LPTSTR txtInput = (LPTSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPTSTR));
+    LPTSTR txtOutput = (LPTSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPTSTR));
+
+    GetWindowText(GetDlgItem(hwnd, ID_TEX_INPUT), txtInput, VAR_LENGTH);
+
+    #if defined(UNICODE) || defined(_UNICODE) /* Unicode */
+        wcstombs(input, txtInput, VAR_LENGTH); /* Convert wide string to char array */
+    #else /* ANSI */
+        strcpy(input, (char*)(txtInput)); /* Copy value from txtInput to input - no need to convert */
+    #endif
 
     int status = 0;
 
@@ -166,12 +172,18 @@ void butConvertClick(HWND hwnd) {
     }
 
     if (status == 0) { /* Conversion succeeded */
-        mbstowcs(wideOutput, output, VAR_LENGTH); /* Convert char array to wide string */
+        #if defined(UNICODE) || defined(_UNICODE) /* Unicode */
+            mbstowcs(txtOutput, output, VAR_LENGTH); /* Convert char array to wide string */
+        #else /* ANSI */
+            strcpy((char*)(txtOutput), output); 
+        #endif
     }
 
-    SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT), status ? L"Internal Error." : wideOutput);
+    SetWindowText(GetDlgItem(hwnd, ID_TEX_OUTPUT), status ? TEXT("Internal Error.") : txtOutput);
 
     free(output);
+    GlobalFree(txtInput);
+    GlobalFree(txtOutput);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -229,14 +241,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
     if(!RegisterClassEx(&wc)) {
-        MessageBox(NULL, L"Can't register window class!", L"Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, TEXT("Can't register window class!"), TEXT("Error"), MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         winClassName,
-        L"BIN&DEC Converter",
+        TEXT("BIN&DEC Converter"),
         WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -245,7 +257,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         NULL, NULL, hInstance, NULL);
 
     if(!hwnd) {
-        MessageBox(NULL, L"Can't create window!", L"Error", MB_ICONEXCLAMATION | MB_OK);
+        MessageBox(NULL, TEXT("Can't create window!"), TEXT("Error"), MB_ICONEXCLAMATION | MB_OK);
         return -1;
     }
 
