@@ -11,9 +11,10 @@
 
 /* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
 int convertDec2Bin(char * input, char ** output) {
-    int i = 0, len = strlen(input);
-    *output = malloc(VAR_LENGTH);
+    int i = 0, j = 0, len = strlen(input), value, remainder, bufferlen;
     char * buffer = malloc(VAR_LENGTH);
+
+    *output = malloc(VAR_LENGTH);
 
     if (*output == NULL || buffer == NULL) {
         return 1;
@@ -25,7 +26,7 @@ int convertDec2Bin(char * input, char ** output) {
         }
     }
 
-    int value = atoi(input), remainder;
+    value = atoi(input);
     memset(buffer, 0, VAR_LENGTH); /* Init buffer with 0 */
 
     while (value != 0) { /* Perform conversion */
@@ -37,10 +38,11 @@ int convertDec2Bin(char * input, char ** output) {
         value /= 2;
     }
 
-    int bufferLen = strlen(buffer), j = 0;
+    bufferlen = strlen(buffer);
+
     memset(*output, 0, VAR_LENGTH); /* Init output with 0 */
 
-    for(i = bufferLen - 1; i >= 0; i--) { /* Store buffer in output starting from buffer and going to start */
+    for(i = bufferlen - 1; i >= 0; i--) { /* Store buffer in output starting from buffer and going to start */
         memset(*output + j, buffer[i], 1);
         j++;
     }
@@ -104,7 +106,7 @@ void createUI(HWND hwnd) {
         20,
         hwnd, (HMENU)ID_RAD_BIN2DEC, hInstance, NULL);
 
-    SendMessage(hBIN2DECRadio, BM_SETCHECK, BST_CHECKED,1); //Set radio button state to checked
+    SendMessage(hBIN2DECRadio, BM_SETCHECK, BST_CHECKED,1); /* Set radio button state to checked */
     SendMessage(hBIN2DECRadio, WM_SETFONT, (LPARAM)GetStockObject(DEFAULT_GUI_FONT), true);
 
     hDEC2BINRadio = CreateWindowEx(
@@ -150,6 +152,7 @@ void createUI(HWND hwnd) {
 
 void butConvertClick(HWND hwnd) {
     char input[VAR_LENGTH], * output;
+    int status;
 
     LPTSTR txtInput = (LPTSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPTSTR));
     LPTSTR txtOutput = (LPTSTR)GlobalAlloc(GPTR, VAR_LENGTH*sizeof(LPTSTR));
@@ -162,7 +165,7 @@ void butConvertClick(HWND hwnd) {
         strcpy(input, (char*)(txtInput)); /* Copy value from txtInput to input - no need to convert */
     #endif
 
-    int status = 0;
+    status = 0;
 
     if (SendDlgItemMessage(hwnd, ID_RAD_BIN2DEC, BM_GETCHECK, 0 , 0)) { /* Make conversion and get status */
         status = convertBin2Dec(input, &output);
@@ -223,9 +226,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     MSG msg;
     INITCOMMONCONTROLSEX icex;
 
-	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-	icex.dwICC = ICC_STANDARD_CLASSES;
-	InitCommonControlsEx(&icex);
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    icex.dwICC = ICC_STANDARD_CLASSES;
+    InitCommonControlsEx(&icex);
 
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = 0;
