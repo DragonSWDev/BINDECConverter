@@ -13,7 +13,7 @@ https://mingw-w64.org/doku.php
 
 ### Compile application
 
-Use `gmake`/`make`/`mingw32-make`.
+Go to the src directory and use `gmake`/`make`/`mingw32-make`.
 
 ```
 gmake [all/clean]
