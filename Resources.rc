@@ -10,11 +10,11 @@ BLOCK "StringFileInfo"
 {
     BLOCK "040904B0"
     {
-        VALUE "CompanyName", "BlackDragonDv"
+        VALUE "CompanyName", "DragonSWDev"
         VALUE "FileDescription", "Binary and decimal values converter."
         VALUE "FileVersion", "1.0"
         VALUE "InternalName", "bindec"
-        VALUE "LegalCopyright", "Copyright 2019 BlackDragonDv"
+        VALUE "LegalCopyright", "Copyright 2021 DragonSWDev"
         VALUE "OriginalFilename", "bindec.exe"
         VALUE "ProductName", "BIN&DEC Converter"
         VALUE "ProductVersion", "1.0"
