@@ -12,32 +12,65 @@
 /* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
 int convertDec2Bin(char * input, char ** output) {
     int i = 0, len = strlen(input);
-    *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
+    *output = malloc(VAR_LENGTH);
+    char * buffer = malloc(VAR_LENGTH);
 
-    for(; i < len; i++)
-        if(!isdigit(input[i]))
+    if (*output == NULL || buffer == NULL) {
+        return 1;
+    }
+
+    for(; i < len; i++) {
+        if(!isdigit(input[i])) {
             return 1;
+        }
+    }
 
-    itoa(atoi(input), *output, 2); /* TODO: itoa() is not included in C89 standard, it's extension to it. */
-    
+    int value = atoi(input), remainder;
+    memset(buffer, 0, VAR_LENGTH); /* Init buffer with 0 */
+
+    while (value != 0) { /* Perform conversion */
+
+        remainder = value % 2;
+
+        strcat(buffer, (remainder) ? "1" : "0");
+
+        value /= 2;
+    }
+
+    int bufferLen = strlen(buffer), j = 0;
+    memset(*output, 0, VAR_LENGTH); /* Init output with 0 */
+
+    for(i = bufferLen - 1; i >= 0; i--) { /* Store buffer in output starting from buffer and going to start */
+        memset(*output + j, buffer[i], 1);
+        j++;
+    }
+
+    free(buffer);
+
     return 0;
 }
 
 /* Convert base10 to base2, store value in output and return 0 whenever conversion succeeds. */
 int convertBin2Dec(char * input, char ** output) {
     int value = 0, power = strlen(input) - 1, i = 0, len = strlen(input);
-    *output = malloc(VAR_LENGTH); /* TODO: Did allocation succeed? */
+    *output = malloc(VAR_LENGTH);
+
+    if (*output == NULL) {
+        return 1;
+    }
 
     for(; i < len; i++)
         if(input[i] != '0' && input[i] != '1')
             return 1;
             
 
-    for(i = 0; i < len; i++, power--)
-        if(input[i] == '1')
+    for(i = 0; i < len; i++, power--) {
+        if(input[i] == '1') {
             value += pow(2, power);
+        }
+    }
 
-    itoa(value, *output, 10);
+    sprintf(*output, "%d", value);
 
     return 0;
 }
