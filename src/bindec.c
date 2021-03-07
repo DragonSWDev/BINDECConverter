@@ -1,4 +1,3 @@
-
 #include <windows.h>
 #include <commctrl.h>
 #include <stdio.h>
@@ -204,12 +203,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             break;
 
         case WM_COMMAND:
-            if(LOWORD(wParam) == ID_BUT_CONVERT)
+            if(LOWORD(wParam) == ID_BUT_CONVERT) {
                 butConvertClick(hwnd);
-
+            }
+            
             break;
 
         case WM_CTLCOLORSTATIC:
+            SetBkMode((HDC)wParam,TRANSPARENT);
+
+            return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
             break;
 
         default:
@@ -238,7 +241,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.hInstance = hInstance;
     wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
     wc.lpszMenuName = NULL;
     wc.lpszClassName = winClassName;
     wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -255,8 +258,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        300, /* TODO: Make it a #define */
-        180,
+        WIN_WIDTH,
+        WIN_HEIGHT,
         NULL, NULL, hInstance, NULL);
 
     if(!hwnd) {

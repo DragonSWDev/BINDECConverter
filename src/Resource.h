@@ -12,4 +12,8 @@
 /* Input and output string length */
 #define VAR_LENGTH 64
 
+/* Window size */
+#define WIN_WIDTH 300
+#define WIN_HEIGHT 180
+
 #endif

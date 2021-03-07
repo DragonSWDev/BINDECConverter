@@ -7,7 +7,7 @@ all: bindec.exe
 clean:
 	del resources.o bindec.o bindec.exe
 
-resources.o: resources.rc
+resources.o: Resources.rc
 	windres $< -o $@
 
 bindec.exe: bindec.o resources.o
