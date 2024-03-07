@@ -20,4 +20,4 @@ gmake [all/clean]
 ```
 
 ## License
-BIN&DEC Converter is distributed under MIT License (see LICENSE file for more informations).
+BIN&DEC Converter is distributed under the terms of the MIT License (check LICENSE file for details).
